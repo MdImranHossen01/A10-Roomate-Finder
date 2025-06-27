@@ -40,7 +40,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/terms-and-conditions"
+                  to="/termandconditions"
                   className="transition hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                 >
                   Terms&nbsp;&amp;&nbsp;Conditions
@@ -60,7 +60,7 @@ const Footer = () => {
                   to="/blog"
                   className="transition hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                 >
-                  Blog
+                  Browse Listings
                 </Link>
               </li>
               <li>

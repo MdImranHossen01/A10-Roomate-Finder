@@ -21,6 +21,7 @@ import Loading from "./Components/Loading.jsx";
 import PrivateRoute from "./Routes/PrivateRoute.jsx";
 import TermAndConditions from "./pages/TermAndConditions.jsx";
 import ContactDetails from "./pages/ContactDetails.jsx";
+import Faq from "./pages/Faq.jsx";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: "/signup",
         Component: Signup,
+      },
+      {
+        path: "/faq",
+        Component: Faq,
       },
 
       {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaSearch, FaHandshake, FaHome, FaUserCheck } from 'react-icons/fa';
+import { Link } from 'react-router';
 
 const HowItWorks = () => {
   const steps = [
@@ -26,7 +27,7 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-12 bg-white dark:bg-gray-800 rounded-xl my-10">
+    <section className="py-10 bg-white dark:bg-gray-800 rounded-xl my-10">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">How Hot Room Works</h2>
@@ -59,12 +60,16 @@ const HowItWorks = () => {
               Join thousands of students and young professionals who found their ideal living space through Hot Room.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
+             <Link to='/browselistings'>
               <button className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition duration-200">
                 Browse Listings
               </button>
+             </Link>
+              <Link to='/addroommate'>
               <button className="px-6 py-3 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-300 rounded-lg border border-indigo-600 dark:border-indigo-400 transition duration-200">
                 List Your Space
               </button>
+              </Link>
             </div>
           </div>
         </div>

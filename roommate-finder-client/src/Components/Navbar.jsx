@@ -1,52 +1,64 @@
-import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, NavLink } from "react-router";          // keep whichever router you use
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase.init";
 import Logo from "./Logo";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
+  /* ------------------------------ state ------------------------------ */
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [user, setUser] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
-  // Check authentication state
+  /* ---------------------------- refs --------------------------------- */
+  // ref that wraps the avatar button + dropdown
+  const profileRef = useRef(null);
+
+  /* ---------------------- auth state listener ------------------------ */
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
       setUser(loggedInUser);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // Update theme in localStorage and HTML
+  /* ----------------------------- theme ------------------------------- */
   useEffect(() => {
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // Handle scroll event for sticky navbar
+  /* -------------------------- scroll state --------------------------- */
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  /* -------------- close profile dropdown on outside click ------------ */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleSignOut = () => {
-    signOut(auth)
-      .then(() => console.log("User signed out"))
-      .catch((error) => console.error("Error signing out:", error));
+  /* ----------------------------- helpers ----------------------------- */
+  const toggleTheme = () =>
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+
+  const handleSignOut = () =>
+    signOut(auth).catch((err) => console.error("Error signing out:", err));
+
+  const closeAllDropdowns = () => {
+    setIsMenuOpen(false);
+    setIsProfileDropdownOpen(false);
   };
 
   const navLinkClass = ({ isActive }) =>
@@ -56,61 +68,54 @@ const Navbar = () => {
         : "hover:bg-gray-100 dark:hover:bg-gray-700 text-yellow-500 font-bold"
     }`;
 
-  const links = (
+  const publicLinks = (
     <>
       <li>
-        <NavLink to="/" className={navLinkClass} end>
+        <NavLink to="/" className={navLinkClass} end onClick={closeAllDropdowns}>
           Home
         </NavLink>
       </li>
-
-       <li>
-        <NavLink to="/contact" className={navLinkClass}>
+      <li>
+        <NavLink to="/contact" className={navLinkClass} onClick={closeAllDropdowns}>
           Contact Us
         </NavLink>
       </li>
-       <li>
-        <NavLink to="/faq" className={navLinkClass}>
-         FAQ
+      <li>
+        <NavLink to="/faq" className={navLinkClass} onClick={closeAllDropdowns}>
+          FAQ
         </NavLink>
       </li>
-            <li>
-        <NavLink to="/browselistings" className={navLinkClass}>
+      <li>
+        <NavLink to="/browselistings" className={navLinkClass} onClick={closeAllDropdowns}>
           Browse Listings
         </NavLink>
       </li>
-      
-       <li>
-        <NavLink to="/terms-and-conditions" className={navLinkClass}>
-          Terms & Conditions
+      <li>
+        <NavLink to="/termandconditions" className={navLinkClass} onClick={closeAllDropdowns}>
+          Terms &amp; Conditions
         </NavLink>
       </li>
-      {user && (
-        <>
-          <li>
-            <NavLink to="/addroommate" className={navLinkClass}>
-              Add to Find Roommate
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/mylistings" className={navLinkClass}>
-              My Listings
-            </NavLink>
-          </li>
-        </>
-      )}
     </>
   );
 
+  const privateLinks = [
+    { to: "/addroommate", text: "Add to Find Roommate" },
+    { to: "/mylistings", text: "My Listings" },
+    { to: "/profile", text: "My Profile" },
+    { to: "/settings", text: "Settings" },
+  ];
+
+  /* =========================== JSX =================================== */
   return (
-    <div 
+    <div
       className={`navbar bg-base-100 shadow-sm dark:bg-gray-800 sticky top-0 z-50 transition-all duration-300 ${
         isScrolled ? "bg-opacity-90 backdrop-blur-sm" : ""
       }`}
     >
       <div className="w-11/12 mx-auto flex justify-between items-center">
-        {/* Left side - logo and mobile menu */}
+        {/* ---------------- left: logo + mobile menu ---------------- */}
         <div className="flex items-center">
+          {/* mobile menu button */}
           <div className="dropdown lg:hidden">
             <div
               tabIndex={0}
@@ -118,6 +123,7 @@ const Navbar = () => {
               className="btn btn-ghost"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
+              {/* burger icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -133,57 +139,58 @@ const Navbar = () => {
                 />
               </svg>
             </div>
+
             {isMenuOpen && (
               <ul
                 tabIndex={0}
                 className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 dark:bg-gray-800 rounded-box w-52"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={closeAllDropdowns}
               >
-                {links}
+                {publicLinks}
+                {user && (
+                  <>
+                    {privateLinks.map((link) => (
+                      <li key={link.to}>
+                        <NavLink to={link.to} className={navLinkClass}>
+                          {link.text}
+                        </NavLink>
+                      </li>
+                    ))}
+                    <li>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        Sign Out
+                      </button>
+                    </li>
+                  </>
+                )}
               </ul>
             )}
           </div>
+
+          {/* brand */}
           <Link to="/" className="btn btn-ghost text-xl dark:text-white">
-           <Logo></Logo>
+            <Logo />
           </Link>
         </div>
 
-        {/* Center - desktop navigation */}
+        {/* ---------------- center: desktop nav -------------------- */}
         <div className="hidden lg:flex">
-          <ul className="flex font-bold">{links}</ul>
+          <ul className="flex font-bold">{publicLinks}</ul>
         </div>
 
-        {/* Right side - user and theme controls */}
+        {/* ---------------- right: theme + user -------------------- */}
         <div className="flex items-center gap-3">
-          {user ? (
-            <div className="relative group flex items-center gap-2">
-              <img
-                src={user.photoURL || "/default-avatar.png"}
-                alt="User"
-                className="w-10 h-10 rounded-full border-2 border-indigo-500 cursor-pointer"
-              />
-              <div className="absolute bottom-[-28px] left-1/2 transform -translate-x-1/2 bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                {user.displayName || "User"}
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="btn btn-error text-white btn-sm"
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <Link to="/signin" className="btn btn-primary text-white btn-sm">
-              Sign In
-            </Link>
-          )}
-
+          {/* theme toggle */}
           <button
             onClick={toggleTheme}
             className="btn btn-ghost btn-circle"
             aria-label="Toggle theme"
           >
             {theme === "light" ? (
+              /* moon icon */
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -193,6 +200,7 @@ const Navbar = () => {
                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
               </svg>
             ) : (
+              /* sun icon */
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -207,6 +215,68 @@ const Navbar = () => {
               </svg>
             )}
           </button>
+
+          {/* user area */}
+          {user ? (
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() =>
+                  setIsProfileDropdownOpen((prev) => !prev)
+                }
+                className="flex items-center gap-2 focus:outline-none"
+                aria-label="User menu"
+                aria-expanded={isProfileDropdownOpen}
+              >
+                <img
+                  src={user.photoURL || "/default-avatar.png"}
+                  alt="User"
+                  className="w-10 h-10 rounded-full border-2 border-indigo-500 cursor-pointer"
+                />
+              </button>
+
+              <AnimatePresence>
+                {isProfileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-56 origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                  >
+                    <div className="py-1">
+                      {privateLinks.map((link) => (
+                        <NavLink
+                          key={link.to}
+                          to={link.to}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          onClick={closeAllDropdowns}
+                        >
+                          {link.text}
+                        </NavLink>
+                      ))}
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          closeAllDropdowns();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <Link
+              to="/signin"
+              className="btn btn-primary text-white btn-sm"
+              onClick={closeAllDropdowns}
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </div>
