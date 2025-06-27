@@ -1,4 +1,4 @@
-# 🏠 Website Name: Hot Room
+# 🏠 Website Name: HomaRoom
 
 **firebase live link: https://roommate-finder-5c556.web.app/
 Vercel Server: https://room-mate-finder-server.vercel.app/
