@@ -95,7 +95,7 @@ async function run() {
             try {
                 const featured = await listingCollection
                     .find({ Availability: "Available" }) 
-                    .limit(6)
+                    .limit(8)
                     .toArray();
 
                 res.send(featured);
