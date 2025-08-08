@@ -171,8 +171,3 @@ http://localhost:5173
 
 **HomaRoom – Find the perfect roommate, faster! 🏡**
 
-```
-
-
-If you want, I can now make the **Pathchakro README** match this same polished format so both repos look consistent.
-```
