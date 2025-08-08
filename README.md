@@ -2,7 +2,7 @@
 
 # 🏠 HomaRoom – Roommate Finder Platform
 
-![HomaRoom Banner](./screenshot.png) <!-- Replace screenshot.png with your actual image file name -->
+![HomaRoom Banner](./homaroom.png) <!-- Replace screenshot.png with your actual image file name -->
 
 **Frontend Live:** [https://roommate-finder-5c556.web.app/](https://roommate-finder-5c556.web.app/)  
 **Backend API:** [https://room-mate-finder-server.vercel.app/](https://room-mate-finder-server.vercel.app/)
